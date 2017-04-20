@@ -35,7 +35,7 @@ public class Fabric8DiscoveryClient {
     this.master_url = master_url != null ? master_url : DEFAULT_MASTER_URL;
     this.api_token = api_token;
     this.namespace = namespace != null ? namespace : DEFAULT_NAMESPACE;
-    this.client = KubeClientBuilder.buildeKubernetesClient(api_token, master_url);
+    this.client = KubeClientBuilder.buildKubernetesClient(api_token, master_url);
   }
 
   public interface ApiToken {

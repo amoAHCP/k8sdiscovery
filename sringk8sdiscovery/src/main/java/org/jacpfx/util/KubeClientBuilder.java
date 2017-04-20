@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 public class KubeClientBuilder {
   private static final String IO_SERVICEACCOUNT_TOKEN = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-  public static KubernetesClient buildeKubernetesClient(String apiToken, String kubernetesMaster) {
+  public static KubernetesClient buildKubernetesClient(String apiToken, String kubernetesMaster) {
     String oauthToken = apiToken;
     if (StringUtil.isNullOrEmpty(oauthToken)) {
       oauthToken = getAccountToken();
