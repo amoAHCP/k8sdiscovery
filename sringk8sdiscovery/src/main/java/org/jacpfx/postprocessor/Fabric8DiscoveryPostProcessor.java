@@ -52,35 +52,10 @@ public class Fabric8DiscoveryPostProcessor implements BeanPostProcessor {
   @Override
   public Object postProcessBeforeInitialization(Object bean, String beanName)
       throws BeansException {
-    resolveServiceNameAnnotation(bean);
-    // TODO resolveEndpointAnnotation
+    ServiceUtil.resolveK8SAnnotationsAndInit(bean,api_token,master_url,namespace);
     return bean;
   }
 
-  private void resolveServiceNameAnnotation(Object bean) {
-    final List<Field> serverNameFields = ServiceUtil.findServiceFields(bean);
-    final List<Field> labelFields = ServiceUtil.findLabelields(bean);
-    // TODO check for Endpoint Annotations
-    if (!serverNameFields.isEmpty()) {
-      KubernetesClient client = KubeClientBuilder.buildKubernetesClient(api_token, master_url);
-      if (client != null) {
-        ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
-      } else {
-        logger.info("no Kubernetes client available");
-      }
-
-    }
-
-    if (!labelFields.isEmpty()) {
-      KubernetesClient client = KubeClientBuilder.buildKubernetesClient(api_token, master_url);
-      if (client != null) {
-        ServiceUtil.findLabelAndSetValue(bean, labelFields, client, namespace);
-      } else {
-        logger.info("no Kubernetes client available");
-      }
-
-    }
-  }
 
 
   @Override

@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import org.jacpfx.postprocessor.Fabric8DiscoveryPostProcessor;
 import org.jacpfx.util.KubeClientBuilder;
 
 /**
@@ -21,7 +20,7 @@ public class Fabric8DiscoveryClient {
   public static final String SEPERATOR = ":";
   private final String api_token, master_url, namespace;
   private final KubernetesClient client;
-  private Logger logger = Logger.getLogger(Fabric8DiscoveryPostProcessor.class.getName());
+  private Logger logger = Logger.getLogger(Fabric8DiscoveryClient.class.getName());
 
   public Fabric8DiscoveryClient() {
     api_token = null;

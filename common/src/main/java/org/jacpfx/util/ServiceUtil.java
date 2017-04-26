@@ -7,6 +7,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jacpfx.discovery.Endpoints;
@@ -19,6 +20,31 @@ import org.jacpfx.discovery.Pods;
 public class ServiceUtil {
 
   public static final String SEPERATOR = ":";
+  private static Logger logger = Logger.getLogger(ServiceUtil.class.getName());
+
+  public static void resolveK8SAnnotationsAndInit(Object bean, String api_token,String master_url,String namespace, KubernetesClient clientPassed) {
+    final List<Field> serverNameFields = ServiceUtil.findServiceFields(bean);
+    final List<Field> labelFields = ServiceUtil.findLabelields(bean);
+    if (!serverNameFields.isEmpty()) {
+      KubernetesClient client = clientPassed!=null?clientPassed:KubeClientBuilder.buildKubernetesClient(api_token, master_url);
+      if (client != null) {
+        ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
+      } else {
+        logger.info("no Kubernetes client available");
+      }
+
+    }
+
+    if (!labelFields.isEmpty()) {
+      KubernetesClient client = clientPassed!=null?clientPassed:KubeClientBuilder.buildKubernetesClient(api_token, master_url);
+      if (client != null) {
+        ServiceUtil.findLabelAndSetValue(bean, labelFields, client, namespace);
+      } else {
+        logger.info("no Kubernetes client available");
+      }
+
+    }
+  }
 
   public static void findServiceEntryAndSetValue(Object bean, List<Field> serverNameFields,
       KubernetesClient client, String namespace) {
