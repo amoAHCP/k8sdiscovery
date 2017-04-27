@@ -52,7 +52,7 @@ public class Fabric8DiscoveryPostProcessor implements BeanPostProcessor {
   @Override
   public Object postProcessBeforeInitialization(Object bean, String beanName)
       throws BeansException {
-    ServiceUtil.resolveK8SAnnotationsAndInit(bean,api_token,master_url,namespace);
+    ServiceUtil.resolveK8SAnnotationsAndInit(bean,api_token,master_url,namespace,null);
     return bean;
   }
 
