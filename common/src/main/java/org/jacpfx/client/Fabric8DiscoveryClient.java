@@ -29,7 +29,7 @@ public class Fabric8DiscoveryClient {
     client = null;
   }
 
-  private Fabric8DiscoveryClient(KubernetesClient client, String api_token, String master_url,
+  private Fabric8DiscoveryClient(String api_token, String master_url,
       String namespace) {
     this.master_url = master_url != null ? master_url : DEFAULT_MASTER_URL;
     this.api_token = api_token;
@@ -53,7 +53,7 @@ public class Fabric8DiscoveryClient {
   }
 
   public static ApiToken builder() {
-    return apitoken -> masterurl -> namespace -> new Fabric8DiscoveryClient(null, apitoken,
+    return apitoken -> masterurl -> namespace -> new Fabric8DiscoveryClient(apitoken,
         masterurl, namespace);
   }
 
@@ -72,7 +72,7 @@ public class Fabric8DiscoveryClient {
     if (!serviceEntryOptional.isPresent()) {
       error.accept(new Throwable("no service with name " + serviceName + " found"));
     }
-    serviceEntryOptional.ifPresent(service -> serviceConsumer.accept(service));
+    serviceEntryOptional.ifPresent(serviceConsumer::accept);
 
   }
 
@@ -92,7 +92,7 @@ public class Fabric8DiscoveryClient {
     if (!serviceEntryOptional.isPresent()) {
       error.accept(new Throwable("no service with label " + label + " found"));
     }
-    serviceEntryOptional.ifPresent(service -> serviceConsumer.accept(service));
+    serviceEntryOptional.ifPresent(serviceConsumer::accept);
   }
 
   public void findEndpointsByLabel(String label, Consumer<EndpointsList> endpointsListConsumer,

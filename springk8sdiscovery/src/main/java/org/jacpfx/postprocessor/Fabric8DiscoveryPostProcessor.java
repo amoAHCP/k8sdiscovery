@@ -1,10 +1,6 @@
 package org.jacpfx.postprocessor;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.logging.Logger;
-import org.jacpfx.util.KubeClientBuilder;
 import org.jacpfx.util.ServiceUtil;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;

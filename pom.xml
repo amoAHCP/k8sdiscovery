@@ -60,12 +60,7 @@
             <email>amo.ahcp@gmail.com</email>
         </developer>
     </developers>
-    <scm>
-        <connection>scm:git:git@github.com:amoAHCP/vxms.git</connection>
-        <developerConnection>scm:git:git@github.com:amoAHCP/vxms.git</developerConnection>
-        <url>git@github.com:amoAHCP/vxms.git</url>
-        <tag>vxms-parent</tag>
-    </scm>
+
 
     <profiles>
         <profile>

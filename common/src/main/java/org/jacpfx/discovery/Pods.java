@@ -1,6 +1,5 @@
 package org.jacpfx.discovery;
 
-import io.fabric8.kubernetes.api.model.EndpointsList;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 

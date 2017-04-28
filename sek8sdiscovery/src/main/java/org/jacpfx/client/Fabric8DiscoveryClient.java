@@ -23,7 +23,7 @@ public class Fabric8DiscoveryClient {
   public static final String SEPERATOR = ":";
   private final String api_token, master_url, namespace;
   private final KubernetesClient client;
-  private Logger logger = Logger.getLogger(Fabric8DiscoveryClient.class.getName());
+  private final Logger logger = Logger.getLogger(Fabric8DiscoveryClient.class.getName());
 
   public Fabric8DiscoveryClient() {
     api_token = null;
@@ -75,7 +75,7 @@ public class Fabric8DiscoveryClient {
     if (!serviceEntryOptional.isPresent()) {
       error.accept(new Throwable("no service with name " + serviceName + " found"));
     }
-    serviceEntryOptional.ifPresent(service -> serviceConsumer.accept(service));
+    serviceEntryOptional.ifPresent(serviceConsumer::accept);
 
   }
 
@@ -95,7 +95,7 @@ public class Fabric8DiscoveryClient {
     if (!serviceEntryOptional.isPresent()) {
       error.accept(new Throwable("no service with label " + label + " found"));
     }
-    serviceEntryOptional.ifPresent(service -> serviceConsumer.accept(service));
+    serviceEntryOptional.ifPresent(serviceConsumer::accept);
   }
 
   public void findEndpointsByLabel(String label, Consumer<EndpointsList> endpointsListConsumer,
@@ -118,23 +118,11 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final List<Field> serverNameFields = ServiceUtil.findServiceFields(bean);
     final List<Field> labelFields = ServiceUtil.findLabelields(bean);
-    if (!serverNameFields.isEmpty()) {
+    if (!serverNameFields.isEmpty())
+      ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
 
-      if (client != null) {
-        ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
-      } else {
-        logger.info("no Kubernetes client available");
-      }
+    if (!labelFields.isEmpty())
+      ServiceUtil.findLabelAndSetValue(bean, labelFields, client, namespace);
 
-    }
-
-    if (!labelFields.isEmpty()) {
-      if (client != null) {
-        ServiceUtil.findLabelAndSetValue(bean, labelFields, client, namespace);
-      } else {
-        logger.info("no Kubernetes client available");
-      }
-
-    }
   }
 }

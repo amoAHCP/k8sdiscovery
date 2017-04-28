@@ -20,7 +20,7 @@ import org.jacpfx.discovery.Pods;
 public class ServiceUtil {
 
   public static final String SEPERATOR = ":";
-  private static Logger logger = Logger.getLogger(ServiceUtil.class.getName());
+  private static final Logger logger = Logger.getLogger(ServiceUtil.class.getName());
 
   public static void resolveK8SAnnotationsAndInit(Object bean, String api_token,String master_url,String namespace, KubernetesClient clientPassed) {
     final List<Field> serverNameFields = ServiceUtil.findServiceFields(bean);

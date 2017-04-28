@@ -44,13 +44,7 @@
       <email>amo.ahcp@gmail.com</email>
     </developer>
   </developers>
-  <scm>
-    <connection>scm:git:git@github.com:amoAHCP/spring-k8s-discovery.git</connection>
-    <developerConnection>scm:git:git@github.com:amoAHCP/spring-k8s-discovery.git
-    </developerConnection>
-    <url>git@github.com:amoAHCP/vxms.git</url>
-    <tag>vxms-parent</tag>
-  </scm>
+
   <dependencies>
 
 
