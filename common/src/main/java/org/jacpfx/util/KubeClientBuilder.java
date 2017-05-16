@@ -13,6 +13,7 @@ import java.nio.file.Paths;
  * Created by amo on 06.04.17.
  */
 public class KubeClientBuilder {
+
   private static final String IO_SERVICEACCOUNT_TOKEN = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
   public static KubernetesClient buildKubernetesClient(String apiToken, String kubernetesMaster) {
@@ -23,7 +24,6 @@ public class KubeClientBuilder {
     if (StringUtil.isNullOrEmpty(oauthToken)) {
       return null;
     }
-    // logger.info("Kubernetes Discovery: Bearer Token { " + apiToken + " }");
     Config config = new ConfigBuilder().withOauthToken(oauthToken).withMasterUrl(kubernetesMaster)
         .build();
     return new DefaultKubernetesClient(config);

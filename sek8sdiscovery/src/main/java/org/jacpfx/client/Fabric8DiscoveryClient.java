@@ -17,9 +17,9 @@ import org.jacpfx.util.ServiceUtil;
  */
 public class Fabric8DiscoveryClient {
 
-  private static final String IO_SERVICEACCOUNT_TOKEN = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-  private static final String DEFAULT_MASTER_URL = "https://kubernetes.default.svc";
-  private static final String DEFAULT_NAMESPACE = "default";
+  public static final String IO_SERVICEACCOUNT_TOKEN = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+  public static final String DEFAULT_MASTER_URL = "https://kubernetes.default.svc";
+  public static final String DEFAULT_NAMESPACE = "default";
   public static final String SEPERATOR = ":";
   private final String api_token, master_url, namespace;
   private final KubernetesClient client;
@@ -32,12 +32,12 @@ public class Fabric8DiscoveryClient {
     client = null;
   }
 
-  private Fabric8DiscoveryClient(KubernetesClient client, String api_token, String master_url,
+  private Fabric8DiscoveryClient(String api_token, String master_url,
       String namespace) {
     this.master_url = master_url != null ? master_url : DEFAULT_MASTER_URL;
     this.api_token = api_token;
     this.namespace = namespace != null ? namespace : DEFAULT_NAMESPACE;
-    this.client = KubeClientBuilder.buildKubernetesClient(api_token, master_url);
+    this.client = KubeClientBuilder.buildKubernetesClient(this.api_token, this.master_url);
   }
 
   public interface ApiToken {
@@ -56,7 +56,7 @@ public class Fabric8DiscoveryClient {
   }
 
   public static ApiToken builder() {
-    return apitoken -> masterurl -> namespace -> new Fabric8DiscoveryClient(null, apitoken,
+    return apitoken -> masterurl -> namespace -> new Fabric8DiscoveryClient(apitoken,
         masterurl, namespace);
   }
 
