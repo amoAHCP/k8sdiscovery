@@ -22,11 +22,13 @@ public class ServiceUtil {
   public static final String SEPERATOR = ":";
   private static final Logger logger = Logger.getLogger(ServiceUtil.class.getName());
 
-  public static void resolveK8SAnnotationsAndInit(Object bean, String api_token,String master_url,String namespace, KubernetesClient clientPassed) {
+  public static void resolveK8SAnnotationsAndInit(Object bean, String api_token, String master_url,
+      String namespace, KubernetesClient clientPassed) {
     final List<Field> serverNameFields = ServiceUtil.findServiceFields(bean);
     final List<Field> labelFields = ServiceUtil.findLabelields(bean);
     if (!serverNameFields.isEmpty()) {
-      KubernetesClient client = clientPassed!=null?clientPassed:KubeClientBuilder.buildKubernetesClient(api_token, master_url);
+      KubernetesClient client = clientPassed != null ? clientPassed
+          : KubeClientBuilder.buildKubernetesClient(api_token, master_url);
       if (client != null) {
         ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
       } else {
@@ -36,7 +38,8 @@ public class ServiceUtil {
     }
 
     if (!labelFields.isEmpty()) {
-      KubernetesClient client = clientPassed!=null?clientPassed:KubeClientBuilder.buildKubernetesClient(api_token, master_url);
+      KubernetesClient client = clientPassed != null ? clientPassed
+          : KubeClientBuilder.buildKubernetesClient(api_token, master_url);
       if (client != null) {
         ServiceUtil.findLabelAndSetValue(bean, labelFields, client, namespace);
       } else {
@@ -54,7 +57,6 @@ public class ServiceUtil {
       final String serviceName = serviceNameAnnotation.value();
       final Optional<Service> serviceEntryOptional = findServiceEntry(client, serviceName,
           namespace);
-
       serviceEntryOptional.ifPresent(serviceEntry -> {
         String hostString = getHostString(serviceEntry);
         FieldUtil.setFieldValue(bean, serviceNameField, hostString);
