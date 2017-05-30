@@ -71,6 +71,8 @@
             <modules>
                 <module>springk8sdiscovery</module>
                 <module>sek8sdiscovery</module>
+                  <module>cdidiscovery</module>
+                    <module>cdi2discovery</module>
             </modules>
         </profile>
 
