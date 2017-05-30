@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+
+  <parent>
+    <groupId>org.jacpfx</groupId>
+    <artifactId>k8sdiscovery</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <relativePath>../</relativePath>
+  </parent>
+
+  <artifactId>cdi2discovery</artifactId>
+  <packaging>jar</packaging>
+
+  <name>cdi2discovery</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+
+    <!--Vertx module name-->
+    <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
+
+    <!--Dependency versions-->
+
+    <junit.version>4.11</junit.version>
+
+    <!--Plugin versions-->
+    <maven.compiler.plugin.version>3.6.1</maven.compiler.plugin.version>
+    <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
+  </properties>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>amo</id>
+      <name>Andy Moncsek</name>
+      <email>amo.ahcp@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git@github.com:amoAHCP/spring-k8s-discovery.git</connection>
+    <developerConnection>scm:git:git@github.com:amoAHCP/spring-k8s-discovery.git</developerConnection>
+    <url>git@github.com:amoAHCP/vxms.git</url>
+    <tag>vxms-parent</tag>
+  </scm>
+  <dependencies>
+
+    <dependency>
+      <groupId>org.jacpfx</groupId>
+      <artifactId>sek8sdiscovery</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+
+    <!-- https://mvnrepository.com/artifact/javax.enterprise/cdi-api -->
+    <dependency>
+      <groupId>javax.enterprise</groupId>
+      <artifactId>cdi-api</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.jboss.weld.se/weld-se-core -->
+    <dependency>
+      <groupId>org.jboss.weld.se</groupId>
+      <artifactId>weld-se-core</artifactId>
+      <version>3.0.0.CR2</version>
+    </dependency>
+
+
+
+
+
+  </dependencies>
+
+
+</project>
