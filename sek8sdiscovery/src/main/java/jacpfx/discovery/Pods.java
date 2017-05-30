@@ -1,17 +1,17 @@
-package org.jacpfx.discovery;
+package jacpfx.discovery;
 
-import io.fabric8.kubernetes.api.model.EndpointsList;
+import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 /**
  * Created by amo on 13.04.17.
  */
-public class Endpoints {
+public class Pods {
 
   private final KubernetesClient client;
   private final String namespace, labelName, labelValue;
 
-  private Endpoints(KubernetesClient client, String namespace, String labelName,
+  private Pods(KubernetesClient client, String namespace, String labelName,
       String labelValue) {
     this.client = client;
     this.namespace = namespace;
@@ -21,7 +21,7 @@ public class Endpoints {
 
   public interface LabelValue {
 
-    Endpoints labelValue(String labelValue);
+    Pods labelValue(String labelValue);
   }
 
   public interface LabelName {
@@ -40,14 +40,14 @@ public class Endpoints {
   }
 
   public static Client build() {
-    return client -> namespace -> labelName -> labelValue -> new Endpoints(client, namespace,
+    return client -> namespace -> labelName -> labelValue -> new Pods(client, namespace,
         labelName, labelValue);
   }
 
-  public EndpointsList getEndpoints() {
+  public PodList getPods() {
     return labelValue != null && !labelValue.isEmpty() ?
-        client.endpoints().inNamespace(namespace).withLabel(labelName, labelValue).list() :
-        client.endpoints().inNamespace(namespace).withLabel(labelName).list();
+        client.pods().inNamespace(namespace).withLabel(labelName, labelValue).list() :
+        client.pods().inNamespace(namespace).withLabel(labelName).list();
   }
 
 }

@@ -1,4 +1,4 @@
-package org.jacpfx.discovery;
+package jacpfx.discovery;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

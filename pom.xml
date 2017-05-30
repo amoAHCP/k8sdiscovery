@@ -70,7 +70,6 @@
             </activation>
             <modules>
                 <module>springk8sdiscovery</module>
-                <module>common</module>
                 <module>sek8sdiscovery</module>
             </modules>
         </profile>

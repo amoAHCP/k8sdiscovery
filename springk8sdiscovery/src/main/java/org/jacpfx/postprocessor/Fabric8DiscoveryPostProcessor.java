@@ -1,7 +1,7 @@
 package org.jacpfx.postprocessor;
 
+import jacpfx.util.ServiceUtil;
 import java.util.logging.Logger;
-import org.jacpfx.util.ServiceUtil;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 

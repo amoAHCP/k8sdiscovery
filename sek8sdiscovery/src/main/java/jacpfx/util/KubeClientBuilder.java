@@ -1,4 +1,4 @@
-package org.jacpfx.util;
+package jacpfx.util;
 
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
@@ -22,9 +22,9 @@ public class KubeClientBuilder {
       oauthToken = getAccountToken();
     }
     if (StringUtil.isNullOrEmpty(oauthToken)) {
-      return null;
+      return new DefaultKubernetesClient();
     }
-    Config config = new ConfigBuilder().withOauthToken(oauthToken).withMasterUrl(kubernetesMaster)
+    final Config config = new ConfigBuilder().withOauthToken(oauthToken).withMasterUrl(kubernetesMaster)
         .build();
     return new DefaultKubernetesClient(config);
   }

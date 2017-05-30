@@ -1,18 +1,20 @@
-package org.jacpfx.util;
+package jacpfx.util;
 
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import jacpfx.discovery.Endpoints;
+import jacpfx.discovery.Label;
+import jacpfx.discovery.Pods;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.jacpfx.discovery.Endpoints;
-import org.jacpfx.discovery.Label;
-import org.jacpfx.discovery.Pods;
 
 /**
  * Created by amo on 13.04.17.
@@ -30,7 +32,8 @@ public class ServiceUtil {
       KubernetesClient client = clientPassed != null ? clientPassed
           : KubeClientBuilder.buildKubernetesClient(api_token, master_url);
       if (client != null) {
-        ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
+        ServiceUtil
+            .findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
       } else {
         logger.info("no Kubernetes client available");
       }
@@ -51,6 +54,7 @@ public class ServiceUtil {
 
   public static void findServiceEntryAndSetValue(Object bean, List<Field> serverNameFields,
       KubernetesClient client, String namespace) {
+    Objects.requireNonNull(client, "no client available");
     serverNameFields.forEach(serviceNameField -> {
       final ServiceName serviceNameAnnotation = serviceNameField
           .getAnnotation(ServiceName.class);
@@ -66,6 +70,7 @@ public class ServiceUtil {
 
   public static void findLabelAndSetValue(Object bean, List<Field> serverNameFields,
       KubernetesClient client, String namespace) {
+    Objects.requireNonNull(client, "no client available");
     serverNameFields.forEach(serviceNameField -> {
       final Label serviceNameAnnotation = serviceNameField
           .getAnnotation(Label.class);
@@ -81,6 +86,7 @@ public class ServiceUtil {
 
   private static void setPods(Object bean, KubernetesClient client, String namespace,
       Field serviceNameField, String labelName, String labelValue) {
+    Objects.requireNonNull(client, "no client available");
     if (serviceNameField.getType().isAssignableFrom(Pods.class)) {
       Pods pods = Pods.build().client(client).namespace(namespace)
           .labelName(labelName).labelValue(labelValue);
@@ -90,6 +96,7 @@ public class ServiceUtil {
 
   private static void setEndpoints(Object bean, KubernetesClient client, String namespace,
       Field serviceNameField, String labelName, String labelValue) {
+    Objects.requireNonNull(client, "no client available");
     if (serviceNameField.getType().isAssignableFrom(Endpoints.class)) {
       Endpoints endpoint = Endpoints.build().client(client).namespace(namespace)
           .labelName(labelName).labelValue(labelValue);
@@ -109,12 +116,14 @@ public class ServiceUtil {
         .collect(Collectors.toList());
   }
 
-  private static Optional<Service> findServiceEntry(KubernetesClient client, String serviceName,
+  public static Optional<Service> findServiceEntry(KubernetesClient client, String serviceName,
       String namespace) {
-    return client
+    Objects.requireNonNull(client, "no client available");
+    return Optional.ofNullable(client
         .services()
         .inNamespace(namespace)
-        .list()
+        .list())
+        .orElse(new ServiceList())
         .getItems()
         .stream()
         .filter(item -> item.getMetadata().getName().equalsIgnoreCase(serviceName))

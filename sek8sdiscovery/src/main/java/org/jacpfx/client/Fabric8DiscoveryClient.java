@@ -2,15 +2,16 @@ package org.jacpfx.client;
 
 import io.fabric8.kubernetes.api.model.EndpointsList;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import jacpfx.util.KubeClientBuilder;
+import jacpfx.util.ServiceUtil;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import org.jacpfx.util.KubeClientBuilder;
-import org.jacpfx.util.ServiceUtil;
 
 /**
  * Created by amo on 06.04.17.
@@ -40,6 +41,14 @@ public class Fabric8DiscoveryClient {
     this.client = KubeClientBuilder.buildKubernetesClient(this.api_token, this.master_url);
   }
 
+  public Fabric8DiscoveryClient(KubernetesClient client, String api_token, String master_url,
+      String namespace) {
+    this.master_url = master_url != null ? master_url : DEFAULT_MASTER_URL;
+    this.api_token = api_token;
+    this.namespace = namespace != null ? namespace : DEFAULT_NAMESPACE;
+    this.client = client;
+  }
+
   public interface ApiToken {
 
     MasterUrl apiToken(String token);
@@ -63,15 +72,7 @@ public class Fabric8DiscoveryClient {
   public void findServiceByName(String serviceName, Consumer<Service> serviceConsumer,
       Consumer<Throwable> error) {
     Objects.requireNonNull(client, "no client available");
-    final Optional<Service> serviceEntryOptional = client
-        .services()
-        .list()
-        .getItems()
-        .stream()
-        .filter(item -> item.getMetadata().getNamespace().equalsIgnoreCase(namespace))
-        .filter(item -> item.getMetadata().getName().equalsIgnoreCase(serviceName))
-        .findFirst();
-
+    final Optional<Service> serviceEntryOptional = ServiceUtil.findServiceEntry(client,serviceName,namespace);
     if (!serviceEntryOptional.isPresent()) {
       error.accept(new Throwable("no service with name " + serviceName + " found"));
     }
@@ -79,18 +80,29 @@ public class Fabric8DiscoveryClient {
 
   }
 
-  public void findServiceByLabel(String label, Consumer<Service> serviceConsumer,
+  public void findServicesByLabel(String label, Consumer<ServiceList> serviceConsumer,
       Consumer<Throwable> error) {
     Objects.requireNonNull(client, "no client available");
-    final Optional<Service> serviceEntryOptional = client
+    final Optional<ServiceList> serviceEntryOptional = Optional.ofNullable(client
         .services()
-        .list()
-        .getItems()
-        .stream()
-        .filter(item -> item.getMetadata().getNamespace().equalsIgnoreCase(namespace))
-        .filter(item -> item.getMetadata().getLabels().keySet().stream()
-            .filter(key -> key.equalsIgnoreCase(label)).findFirst().isPresent())
-        .findFirst();
+        .inNamespace(namespace)
+        .withLabel(label)
+        .list());
+
+    if (!serviceEntryOptional.isPresent()) {
+      error.accept(new Throwable("no service with label " + label + " found"));
+    }
+    serviceEntryOptional.ifPresent(serviceConsumer::accept);
+  }
+
+  public void findServicesByLabel(String label, String value, Consumer<ServiceList> serviceConsumer,
+      Consumer<Throwable> error) {
+    Objects.requireNonNull(client, "no client available");
+    final Optional<ServiceList> serviceEntryOptional = Optional.ofNullable(client
+        .services()
+        .inNamespace(namespace)
+        .withLabel(label, value)
+        .list());
 
     if (!serviceEntryOptional.isPresent()) {
       error.accept(new Throwable("no service with label " + label + " found"));
@@ -101,16 +113,32 @@ public class Fabric8DiscoveryClient {
   public void findEndpointsByLabel(String label, Consumer<EndpointsList> endpointsListConsumer,
       Consumer<Throwable> error) {
     Objects.requireNonNull(client, "no client available");
-    final EndpointsList serviceEntryOptional = client
+    final Optional<EndpointsList> serviceEntryOptional = Optional.ofNullable(client
         .endpoints()
         .inNamespace(namespace)
         .withLabel(label)
-        .list();
+        .list());
 
-    if (serviceEntryOptional == null) {
+    if (!serviceEntryOptional.isPresent()) {
       error.accept(new Throwable("no service with label " + label + " found"));
     }
-    endpointsListConsumer.accept(serviceEntryOptional);
+    serviceEntryOptional.ifPresent(endpointsListConsumer::accept);
+  }
+
+  public void findEndpointsByLabel(String label, String value,
+      Consumer<EndpointsList> endpointsListConsumer,
+      Consumer<Throwable> error) {
+    Objects.requireNonNull(client, "no client available");
+    final Optional<EndpointsList> serviceEntryOptional = Optional.ofNullable(client
+        .endpoints()
+        .inNamespace(namespace)
+        .withLabel(label, value)
+        .list());
+
+    if (!serviceEntryOptional.isPresent()) {
+      error.accept(new Throwable("no service with label " + label + " found"));
+    }
+    serviceEntryOptional.ifPresent(endpointsListConsumer::accept);
   }
 
 
@@ -118,11 +146,13 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final List<Field> serverNameFields = ServiceUtil.findServiceFields(bean);
     final List<Field> labelFields = ServiceUtil.findLabelields(bean);
-    if (!serverNameFields.isEmpty())
+    if (!serverNameFields.isEmpty()) {
       ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
+    }
 
-    if (!labelFields.isEmpty())
+    if (!labelFields.isEmpty()) {
       ServiceUtil.findLabelAndSetValue(bean, labelFields, client, namespace);
+    }
 
   }
 }

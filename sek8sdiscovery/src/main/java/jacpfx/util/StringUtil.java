@@ -1,4 +1,4 @@
-package org.jacpfx.util;
+package jacpfx.util;
 
 /**
  * Created by amo on 06.04.17.
