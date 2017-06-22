@@ -2,12 +2,10 @@ package org.jacpfx.discovery.extension;
 
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import jacpfx.discovery.Label;
-import jacpfx.util.KubeClientBuilder;
-import jacpfx.util.ServiceUtil;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
@@ -17,12 +15,17 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
+import org.jacpfx.discovery.Label;
 import org.jacpfx.discovery.annotation.K8SDiscovery;
+import org.jacpfx.util.KubeClientBuilder;
+import org.jacpfx.util.ServiceUtil;
 
 /**
  * Created by amo on 18.05.17.
  */
 public class K8SExtension implements Extension {
+
+  private Logger log = Logger.getLogger(K8SExtension.class.getName());
 
   public <T> void initializePropertyLoading(final @Observes ProcessInjectionTarget<T> pit) {
     final AnnotatedType<T> at = pit.getAnnotatedType();
@@ -48,9 +51,13 @@ public class K8SExtension implements Extension {
             .filter(f -> f.isAnnotationPresent(Label.class)).map(f -> f.getJavaMember())
             .collect(Collectors.toList());
 
-        ServiceUtil.findServiceEntryAndSetValue(instance, serviceNameFileds, kubernetesClient, namespace);
-        ServiceUtil.findLabelAndSetValue(instance, labelFields, kubernetesClient, namespace);
-
+        try {
+          ServiceUtil.findServiceEntryAndSetValue(instance, serviceNameFileds, kubernetesClient,
+              namespace);
+          ServiceUtil.findLabelAndSetValue(instance, labelFields, kubernetesClient, namespace);
+        } catch (Exception e) {
+          log.info("no client connection");
+        }
 
       }
 

@@ -1,4 +1,4 @@
-package jacpfx.util;
+package org.jacpfx.util;
 
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;

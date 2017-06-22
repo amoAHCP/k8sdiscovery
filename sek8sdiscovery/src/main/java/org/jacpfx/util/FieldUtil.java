@@ -1,4 +1,4 @@
-package jacpfx.util;
+package org.jacpfx.util;
 
 import java.lang.reflect.Field;
 

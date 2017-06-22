@@ -1,13 +1,13 @@
-package jacpfx.util;
+package org.jacpfx.util;
 
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import jacpfx.discovery.Endpoints;
-import jacpfx.discovery.Label;
-import jacpfx.discovery.Pods;
+import org.jacpfx.discovery.Endpoints;
+import org.jacpfx.discovery.Label;
+import org.jacpfx.discovery.Pods;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
