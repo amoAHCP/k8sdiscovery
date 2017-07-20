@@ -18,7 +18,9 @@ import javax.interceptor.InterceptorBinding;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ METHOD, TYPE })
 public @interface K8SDiscovery {
+    String user() default "";
+    String pwd() default "";
     String api_token() default "";
     String master_url() default "https://kubernetes.default.svc";
-    String namespace() default "default";
+    String namespace() default "";
 }

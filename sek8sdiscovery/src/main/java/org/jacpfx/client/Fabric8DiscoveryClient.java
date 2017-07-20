@@ -4,49 +4,61 @@ import io.fabric8.kubernetes.api.model.EndpointsList;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.jacpfx.util.KubeClientBuilder;
-import org.jacpfx.util.ServiceUtil;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import org.jacpfx.util.KubeClientBuilder;
+import org.jacpfx.util.ServiceUtil;
 
 /**
  * Created by amo on 06.04.17.
  */
 public class Fabric8DiscoveryClient {
 
-  public static final String IO_SERVICEACCOUNT_TOKEN = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-  public static final String DEFAULT_MASTER_URL = "https://kubernetes.default.svc";
-  public static final String DEFAULT_NAMESPACE = "default";
-  public static final String SEPERATOR = ":";
-  private final String api_token, master_url, namespace;
+  private final String user, pwd, api_token, master_url, namespace;
   private final KubernetesClient client;
   private final Logger logger = Logger.getLogger(Fabric8DiscoveryClient.class.getName());
 
   public Fabric8DiscoveryClient() {
+    user = null;
+    pwd = null;
     api_token = null;
-    master_url = DEFAULT_MASTER_URL;
-    namespace = DEFAULT_NAMESPACE;
+    master_url = null;
+    namespace = null;
     client = null;
   }
 
-  private Fabric8DiscoveryClient(String api_token, String master_url,
+  private Fabric8DiscoveryClient(
+      String user,
+      String pwd,
+      String api_token,
+      String master_url,
       String namespace) {
-    this.master_url = master_url != null ? master_url : DEFAULT_MASTER_URL;
+    this.user = user;
+    this.pwd = pwd;
     this.api_token = api_token;
-    this.namespace = namespace != null ? namespace : DEFAULT_NAMESPACE;
-    this.client = KubeClientBuilder.buildKubernetesClient(this.api_token, this.master_url);
+    this.namespace = namespace;
+    this.master_url = master_url;
+    this.client = KubeClientBuilder.buildKubernetesClient(
+        this.user,
+        this.pwd,
+        this.api_token,
+        this.master_url,
+        this.namespace);
   }
 
-  public Fabric8DiscoveryClient(KubernetesClient client, String api_token, String master_url,
-      String namespace) {
-    this.master_url = master_url != null ? master_url : DEFAULT_MASTER_URL;
-    this.api_token = api_token;
-    this.namespace = namespace != null ? namespace : DEFAULT_NAMESPACE;
-    this.client = client;
+
+  public interface User {
+
+    Pwd user(String user);
+  }
+
+  public interface Pwd {
+
+    ApiToken pwd(String pwd);
   }
 
   public interface ApiToken {
@@ -64,15 +76,20 @@ public class Fabric8DiscoveryClient {
     Fabric8DiscoveryClient namespace(String namespace);
   }
 
-  public static ApiToken builder() {
-    return apitoken -> masterurl -> namespace -> new Fabric8DiscoveryClient(apitoken,
-        masterurl, namespace);
+  public static User builder() {
+    return user -> pwd -> apitoken -> masterurl -> namespace -> new Fabric8DiscoveryClient(
+        user,
+        pwd,
+        apitoken,
+        masterurl,
+        namespace);
   }
 
   public void findServiceByName(String serviceName, Consumer<Service> serviceConsumer,
       Consumer<Throwable> error) {
     Objects.requireNonNull(client, "no client available");
-    final Optional<Service> serviceEntryOptional = ServiceUtil.findServiceEntry(client,serviceName,namespace);
+    final Optional<Service> serviceEntryOptional = ServiceUtil
+        .findServiceEntry(client, serviceName);
     if (!serviceEntryOptional.isPresent()) {
       error.accept(new Throwable("no service with name " + serviceName + " found"));
     }
@@ -85,7 +102,7 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final Optional<ServiceList> serviceEntryOptional = Optional.ofNullable(client
         .services()
-        .inNamespace(namespace)
+       // .inNamespace(namespace)
         .withLabel(label)
         .list());
 
@@ -100,7 +117,7 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final Optional<ServiceList> serviceEntryOptional = Optional.ofNullable(client
         .services()
-        .inNamespace(namespace)
+       // .inNamespace(namespace)
         .withLabel(label, value)
         .list());
 
@@ -115,7 +132,7 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final Optional<EndpointsList> serviceEntryOptional = Optional.ofNullable(client
         .endpoints()
-        .inNamespace(namespace)
+     //   .inNamespace(namespace)
         .withLabel(label)
         .list());
 
@@ -131,7 +148,7 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final Optional<EndpointsList> serviceEntryOptional = Optional.ofNullable(client
         .endpoints()
-        .inNamespace(namespace)
+       // .inNamespace(namespace)
         .withLabel(label, value)
         .list());
 
@@ -147,12 +164,13 @@ public class Fabric8DiscoveryClient {
     final List<Field> serverNameFields = ServiceUtil.findServiceFields(bean);
     final List<Field> labelFields = ServiceUtil.findLabelields(bean);
     if (!serverNameFields.isEmpty()) {
-      ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
+      ServiceUtil.findServiceEntryAndSetValue(bean, serverNameFields, client);
     }
 
     if (!labelFields.isEmpty()) {
-      ServiceUtil.findLabelAndSetValue(bean, labelFields, client, namespace);
+      ServiceUtil.findLabelAndSetValue(bean, labelFields, client);
     }
 
   }
+
 }

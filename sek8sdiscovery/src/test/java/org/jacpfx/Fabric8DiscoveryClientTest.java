@@ -67,7 +67,7 @@ public class Fabric8DiscoveryClientTest {
     Endpoints discoveryNode = createEndpoints(1);
     nodesInNamespace.getItems().add(discoveryNode);
    // nodesWithLabel.getItems().add(discoveryNode);
-    Fabric8DiscoveryClient theclient = new Fabric8DiscoveryClient(client,API_TOKEN,KUBERNETES_MASTER_URL,NAMESPACE);
+    Fabric8DiscoveryClient theclient = null;//new Fabric8DiscoveryClient(client,null,null,API_TOKEN,KUBERNETES_MASTER_URL,NAMESPACE);
 
     theclient.findServicesByLabel(NAMESPACE, result -> {
       System.out.println(result);

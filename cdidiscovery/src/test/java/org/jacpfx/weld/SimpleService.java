@@ -5,9 +5,7 @@ package org.jacpfx.weld;
  */
 import io.fabric8.annotations.ServiceName;
 import javax.inject.*;
-import org.jacpfx.discovery.annotation.K8SDiscovery;
 
-@K8SDiscovery
 public class SimpleService {
   @Inject
   private Hello greeter;

@@ -5,9 +5,6 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.jacpfx.discovery.Endpoints;
-import org.jacpfx.discovery.Label;
-import org.jacpfx.discovery.Pods;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +12,9 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jacpfx.discovery.Endpoints;
+import org.jacpfx.discovery.Pods;
+import org.jacpfx.discovery.annotation.Label;
 
 /**
  * Created by amo on 13.04.17.
@@ -24,16 +24,27 @@ public class ServiceUtil {
   public static final String SEPERATOR = ":";
   private static final Logger logger = Logger.getLogger(ServiceUtil.class.getName());
 
-  public static void resolveK8SAnnotationsAndInit(Object bean, String api_token, String master_url,
-      String namespace, KubernetesClient clientPassed) {
+  public static void resolveK8SAnnotationsAndInit(
+      Object bean,
+      String user,
+      String pwd,
+      String api_token,
+      String master_url,
+      String namespace,
+      KubernetesClient clientPassed) {
     final List<Field> serverNameFields = ServiceUtil.findServiceFields(bean);
     final List<Field> labelFields = ServiceUtil.findLabelields(bean);
     if (!serverNameFields.isEmpty()) {
-      KubernetesClient client = clientPassed != null ? clientPassed
-          : KubeClientBuilder.buildKubernetesClient(api_token, master_url);
+      KubernetesClient client = getKubernetesClient(
+          user,
+          pwd,
+          api_token,
+          master_url,
+          namespace,
+          clientPassed);
       if (client != null) {
         ServiceUtil
-            .findServiceEntryAndSetValue(bean, serverNameFields, client, namespace);
+            .findServiceEntryAndSetValue(bean, serverNameFields, client);
       } else {
         logger.info("no Kubernetes client available");
       }
@@ -41,10 +52,15 @@ public class ServiceUtil {
     }
 
     if (!labelFields.isEmpty()) {
-      KubernetesClient client = clientPassed != null ? clientPassed
-          : KubeClientBuilder.buildKubernetesClient(api_token, master_url);
+      KubernetesClient client = getKubernetesClient(
+          user,
+          pwd,
+          api_token,
+          master_url,
+          namespace,
+          clientPassed);
       if (client != null) {
-        ServiceUtil.findLabelAndSetValue(bean, labelFields, client, namespace);
+        ServiceUtil.findLabelAndSetValue(bean, labelFields, client);
       } else {
         logger.info("no Kubernetes client available");
       }
@@ -52,15 +68,20 @@ public class ServiceUtil {
     }
   }
 
+  private static KubernetesClient getKubernetesClient(String user, String pwd, String api_token,
+      String master_url, String namespace, KubernetesClient clientPassed) {
+    return clientPassed != null ? clientPassed
+        : KubeClientBuilder.buildKubernetesClient(user, pwd, api_token, master_url, namespace);
+  }
+
   public static void findServiceEntryAndSetValue(Object bean, List<Field> serverNameFields,
-      KubernetesClient client, String namespace) {
+      KubernetesClient client) {
     Objects.requireNonNull(client, "no client available");
     serverNameFields.forEach(serviceNameField -> {
       final ServiceName serviceNameAnnotation = serviceNameField
           .getAnnotation(ServiceName.class);
       final String serviceName = serviceNameAnnotation.value();
-      final Optional<Service> serviceEntryOptional = findServiceEntry(client, serviceName,
-          namespace);
+      final Optional<Service> serviceEntryOptional = findServiceEntry(client, serviceName);
       serviceEntryOptional.ifPresent(serviceEntry -> {
         String hostString = getHostString(serviceEntry);
         FieldUtil.setFieldValue(bean, serviceNameField, hostString);
@@ -69,7 +90,7 @@ public class ServiceUtil {
   }
 
   public static void findLabelAndSetValue(Object bean, List<Field> serverNameFields,
-      KubernetesClient client, String namespace) {
+      KubernetesClient client) {
     Objects.requireNonNull(client, "no client available");
     serverNameFields.forEach(serviceNameField -> {
       final Label serviceNameAnnotation = serviceNameField
@@ -77,28 +98,28 @@ public class ServiceUtil {
       final String labelName = serviceNameAnnotation.name();
       final String labelValue = serviceNameAnnotation.labelValue();
 
-      setEndpoints(bean, client, namespace, serviceNameField, labelName, labelValue);
+      setEndpoints(bean, client, serviceNameField, labelName, labelValue);
 
-      setPods(bean, client, namespace, serviceNameField, labelName, labelValue);
+      setPods(bean, client, serviceNameField, labelName, labelValue);
 
     });
   }
 
-  private static void setPods(Object bean, KubernetesClient client, String namespace,
+  private static void setPods(Object bean, KubernetesClient client,
       Field serviceNameField, String labelName, String labelValue) {
     Objects.requireNonNull(client, "no client available");
     if (serviceNameField.getType().isAssignableFrom(Pods.class)) {
-      Pods pods = Pods.build().client(client).namespace(namespace)
+      Pods pods = Pods.build().client(client).namespace(client.getNamespace())
           .labelName(labelName).labelValue(labelValue);
       FieldUtil.setFieldValue(bean, serviceNameField, pods);
     }
   }
 
-  private static void setEndpoints(Object bean, KubernetesClient client, String namespace,
+  private static void setEndpoints(Object bean, KubernetesClient client,
       Field serviceNameField, String labelName, String labelValue) {
     Objects.requireNonNull(client, "no client available");
     if (serviceNameField.getType().isAssignableFrom(Endpoints.class)) {
-      Endpoints endpoint = Endpoints.build().client(client).namespace(namespace)
+      Endpoints endpoint = Endpoints.build().client(client).namespace(client.getNamespace())
           .labelName(labelName).labelValue(labelValue);
       FieldUtil.setFieldValue(bean, serviceNameField, endpoint);
     }
@@ -116,12 +137,11 @@ public class ServiceUtil {
         .collect(Collectors.toList());
   }
 
-  public static Optional<Service> findServiceEntry(KubernetesClient client, String serviceName,
-      String namespace) {
+  public static Optional<Service> findServiceEntry(KubernetesClient client, String serviceName) {
     Objects.requireNonNull(client, "no client available");
     return Optional.ofNullable(client
         .services()
-        .inNamespace(namespace)
+        .inNamespace(client.getNamespace())
         .list())
         .orElse(new ServiceList())
         .getItems()

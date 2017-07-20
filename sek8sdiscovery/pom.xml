@@ -48,10 +48,18 @@
 
   <dependencies>
 
+    <!-- https://mvnrepository.com/artifact/io.fabric8/kubernetes-client -->
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>kubernetes-client</artifactId>
-      <version>2.2.13</version>
+      <version>2.5.6</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/io.fabric8/openshift-client -->
+    <dependency>
+      <groupId>io.fabric8</groupId>
+      <artifactId>openshift-client</artifactId>
+      <version>2.5.6</version>
     </dependency>
 
     <dependency>

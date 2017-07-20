@@ -15,8 +15,8 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
-import org.jacpfx.discovery.Label;
 import org.jacpfx.discovery.annotation.K8SDiscovery;
+import org.jacpfx.discovery.annotation.Label;
 import org.jacpfx.util.KubeClientBuilder;
 import org.jacpfx.util.ServiceUtil;
 
@@ -33,11 +33,13 @@ public class K8SExtension implements Extension {
       return;
     }
     final K8SDiscovery discovery = at.getAnnotation(K8SDiscovery.class);
+    final String user = discovery.user();
+    final String pwd = discovery.pwd();
     final String api_token = discovery.api_token();
     final String master_url = discovery.master_url();
     final String namespace = discovery.namespace();
     final KubernetesClient kubernetesClient = KubeClientBuilder
-        .buildKubernetesClient(api_token, master_url);
+        .buildKubernetesClient(user, pwd, api_token, master_url, namespace);
     final InjectionTarget<T> it = pit.getInjectionTarget();
     final InjectionTarget<T> wrapped = new InjectionTarget<T>() {
       @Override
@@ -50,16 +52,17 @@ public class K8SExtension implements Extension {
         final List<Field> labelFields = fields.stream()
             .filter(f -> f.isAnnotationPresent(Label.class)).map(f -> f.getJavaMember())
             .collect(Collectors.toList());
-
         try {
-          ServiceUtil.findServiceEntryAndSetValue(instance, serviceNameFileds, kubernetesClient,
-              namespace);
-          ServiceUtil.findLabelAndSetValue(instance, labelFields, kubernetesClient, namespace);
+          log.info("namespace : " + namespace);
+          ServiceUtil.findServiceEntryAndSetValue(instance, serviceNameFileds, kubernetesClient);
+          ServiceUtil.findLabelAndSetValue(instance, labelFields, kubernetesClient);
         } catch (Exception e) {
-          log.info("no client connection");
+          log.info("no client connection: "+e.getMessage());
         }
 
+
       }
+
 
 
       @Override
