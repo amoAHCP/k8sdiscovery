@@ -78,11 +78,11 @@ public class KubeClientBuilder {
 
   private static KubernetesClient createClient(Config config) {
     final DefaultKubernetesClient client = new DefaultKubernetesClient(config);
-    if (client.isAdaptable(OpenShiftClient.class)) {
+    /**if (client.isAdaptable(OpenShiftClient.class)) { // TODO check why this is throwing an unauthorized access exception
       OpenShiftClient oClient = client.adapt(OpenShiftClient.class);
       log.info("use OPENSHIFT");
       return oClient;
-    }
+    }**/
     return client;
   }
 

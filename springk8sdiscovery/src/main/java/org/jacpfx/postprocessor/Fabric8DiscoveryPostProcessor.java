@@ -1,15 +1,19 @@
 package org.jacpfx.postprocessor;
 
-import java.util.logging.Logger;
-import org.jacpfx.util.ServiceUtil;
+import org.jacpfx.discovery.DiscoveryUtil;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.env.Environment;
 
 /**
  * Created by amo on 05.04.17.
  */
 public class Fabric8DiscoveryPostProcessor implements BeanPostProcessor {
+
   private final String user, pwd, api_token, master_url, namespace;
+  @Autowired
+  private Environment env;
 
   public Fabric8DiscoveryPostProcessor() {
     this.api_token = null;
@@ -55,8 +59,8 @@ public class Fabric8DiscoveryPostProcessor implements BeanPostProcessor {
   @Override
   public Object postProcessBeforeInitialization(Object bean, String beanName)
       throws BeansException {
-    ServiceUtil
-        .resolveK8SAnnotationsAndInit(bean, user, pwd, api_token, master_url, namespace, null);
+    DiscoveryUtil
+        .resolveK8SAnnotationsAndInit(bean, user, pwd, api_token, master_url, namespace,  env, null);
     return bean;
   }
 

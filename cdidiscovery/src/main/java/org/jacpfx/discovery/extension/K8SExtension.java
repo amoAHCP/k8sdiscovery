@@ -1,6 +1,7 @@
 package org.jacpfx.discovery.extension;
 
 import io.fabric8.annotations.ServiceName;
+import io.fabric8.annotations.WithLabel;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -16,7 +17,6 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
 import org.jacpfx.discovery.annotation.K8SDiscovery;
-import org.jacpfx.discovery.annotation.Label;
 import org.jacpfx.util.KubeClientBuilder;
 import org.jacpfx.util.ServiceUtil;
 
@@ -46,18 +46,22 @@ public class K8SExtension implements Extension {
       public void inject(T instance, CreationalContext<T> ctx) {
         it.inject(instance, ctx);
         final Set<AnnotatedField<? super T>> fields = at.getFields();
-        final List<Field> serviceNameFileds = fields.stream()
-            .filter(f -> f.isAnnotationPresent(ServiceName.class)).map(f -> f.getJavaMember())
-            .collect(Collectors.toList());
-        final List<Field> labelFields = fields.stream()
-            .filter(f -> f.isAnnotationPresent(Label.class)).map(f -> f.getJavaMember())
-            .collect(Collectors.toList());
+        final List<Field> serviceNameFileds =
+            fields
+                .stream()
+                .filter(f -> f.isAnnotationPresent(ServiceName.class)).map(f -> f.getJavaMember())
+                .collect(Collectors.toList());
+        final List<Field> labelFields =
+            fields
+                .stream()
+                .filter(f -> f.isAnnotationPresent(WithLabel.class)).map(f -> f.getJavaMember())
+                .collect(Collectors.toList());
         try {
           log.info("namespace : " + namespace);
           ServiceUtil.findServiceEntryAndSetValue(instance, serviceNameFileds, kubernetesClient);
-          ServiceUtil.findLabelAndSetValue(instance, labelFields, kubernetesClient);
+          ServiceUtil.findPodsAndEndpointsAndSetValue(instance, labelFields, kubernetesClient);
         } catch (Exception e) {
-          log.info("no client connection: "+e.getMessage());
+          log.info("no client connection: " + e.getMessage());
         }
 
 

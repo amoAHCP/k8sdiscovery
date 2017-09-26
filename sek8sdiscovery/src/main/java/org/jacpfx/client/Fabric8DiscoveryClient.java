@@ -6,6 +6,7 @@ import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -102,7 +103,6 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final Optional<ServiceList> serviceEntryOptional = Optional.ofNullable(client
         .services()
-       // .inNamespace(namespace)
         .withLabel(label)
         .list());
 
@@ -117,7 +117,6 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final Optional<ServiceList> serviceEntryOptional = Optional.ofNullable(client
         .services()
-       // .inNamespace(namespace)
         .withLabel(label, value)
         .list());
 
@@ -127,12 +126,45 @@ public class Fabric8DiscoveryClient {
     serviceEntryOptional.ifPresent(serviceConsumer::accept);
   }
 
+  public void findServicesByLabel(Map<String, String> labels, Consumer<ServiceList> serviceConsumer,
+      Consumer<Throwable> error) {
+    Objects.requireNonNull(client, "no client available");
+    final Optional<ServiceList> serviceEntryOptional = ServiceUtil.getServicesByLabel(labels,client);
+
+    if (!serviceEntryOptional.isPresent()) {
+      error.accept(new Throwable("no service with label " + labels + " found"));
+    }
+    serviceEntryOptional.ifPresent(serviceConsumer::accept);
+  }
+
+
+
+  /**
+   * Uses a regex for Services
+   */
+  public void findServicesByNameAndLabel(String name, Map<String, String> labels,
+      Consumer<List<Service>> serviceConsumer,
+      Consumer<Throwable> error) {
+    Objects.requireNonNull(client, "no client available");
+    final List<Service> services = ServiceUtil.findServiceEntries(client, name);
+
+    final List<Service> filteredServices = ServiceUtil.filterServicesByName(labels, services);
+    if (filteredServices.isEmpty()) {
+      error.accept(
+          new Throwable("no service with label " + labels + " and name:" + name + " found"));
+    } else {
+      serviceConsumer.accept(filteredServices);
+    }
+
+  }
+
+
+
   public void findEndpointsByLabel(String label, Consumer<EndpointsList> endpointsListConsumer,
       Consumer<Throwable> error) {
     Objects.requireNonNull(client, "no client available");
     final Optional<EndpointsList> serviceEntryOptional = Optional.ofNullable(client
         .endpoints()
-     //   .inNamespace(namespace)
         .withLabel(label)
         .list());
 
@@ -148,7 +180,6 @@ public class Fabric8DiscoveryClient {
     Objects.requireNonNull(client, "no client available");
     final Optional<EndpointsList> serviceEntryOptional = Optional.ofNullable(client
         .endpoints()
-       // .inNamespace(namespace)
         .withLabel(label, value)
         .list());
 
@@ -168,7 +199,7 @@ public class Fabric8DiscoveryClient {
     }
 
     if (!labelFields.isEmpty()) {
-      ServiceUtil.findLabelAndSetValue(bean, labelFields, client);
+      ServiceUtil.findPodsAndEndpointsAndSetValue(bean, labelFields, client);
     }
 
   }

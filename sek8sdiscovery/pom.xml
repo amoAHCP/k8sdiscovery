@@ -29,6 +29,8 @@
     <junit.version>4.12</junit.version>
     <mockito.version>1.10.19</mockito.version>
     <powermock.version>1.6.6</powermock.version>
+    <kubernetes-client.version>2.6.1</kubernetes-client.version>
+    <fabric8-annotations.version>2.3.4</fabric8-annotations.version>
   </properties>
 
   <licenses>
@@ -52,20 +54,20 @@
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>kubernetes-client</artifactId>
-      <version>2.5.6</version>
+      <version>${kubernetes-client.version}</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/io.fabric8/openshift-client -->
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>openshift-client</artifactId>
-      <version>2.5.6</version>
+      <version>${kubernetes-client.version}</version>
     </dependency>
 
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>fabric8-annotations</artifactId>
-      <version>2.2.19</version>
+      <version>${fabric8-annotations.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
